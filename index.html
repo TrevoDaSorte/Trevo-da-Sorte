@@ -2,350 +2,228 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Trevo da Sorte</title>
+<title>🍀 Trevo da Sorte PRO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {
-  margin:0;
-  font-family: Arial;
-  text-align:center;
-  background: radial-gradient(circle at top, #00ff88, #003300 70%);
+    font-family: Arial;
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:#fff;
+    text-align:center;
+    margin:0;
 }
 
-h1 {
-  margin:10px;
-  font-size:35px;
-  text-shadow:0 0 10px #00ff88;
-}
-
-.bolas {
-  display:flex;
-  justify-content:center;
-  gap:15px;
-  margin:10px;
-}
-
-.bola {
-  width:60px;
-  height:60px;
-  border-radius:50%;
-  background: radial-gradient(circle at 30% 30%, #ffffff, #00ff88 60%, #009944);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-  box-shadow:0 0 15px #00ff88;
-  animation: pulse 1.5s infinite alternate;
-}
-
-@keyframes pulse {
-  from { transform:scale(1); }
-  to { transform:scale(1.1); }
+header {
+    background:#000;
+    padding:15px;
+    font-size:22px;
 }
 
 .grid {
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap:15px;
-  padding:20px;
+    display:grid;
+    grid-template-columns:repeat(10,1fr);
+    gap:8px;
+    padding:15px;
 }
 
-.ticket {
-  background: linear-gradient(145deg, #ffffff, #d4ffd4);
-  border:2px solid #00ff88;
-  border-radius:12px;
-  padding:8px;
-  cursor:pointer;
-  box-shadow:0 0 10px #00ff88;
+.bilhete {
+    padding:12px;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
 }
 
-.ticket:hover {
-  transform:scale(1.05);
+.disponivel { background:#2ecc71; }
+.reservado { background:#f1c40f; color:#000; }
+.pago { background:#e74c3c; }
+
+.admin {
+    display:none;
+    background:#111;
+    padding:10px;
 }
 
-.block {
-  border:1px solid #00aa55;
-  padding:6px;
-  border-radius:6px;
-  background:#eaffea;
-  margin:3px;
+#resultado {
+    font-size:50px;
+    margin:20px;
 }
 
-.meu-botao {
-  position:fixed;
-  bottom:10px;
-  right:10px;
-  background:#00ff88;
-  padding:10px;
-  border:none;
-  border-radius:8px;
+.painel {
+    background:#000;
+    padding:10px;
+    margin:10px;
+}
+
+button {
+    padding:10px;
+    margin:5px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🍀 Trevo da Sorte</h1>
+<header>🍀 Trevo da Sorte PRO</header>
 
-<div class="bolas" id="bolas"></div>
-<h2 id="vencedor"></h2>
+<h2>🎥 Sorteio</h2>
+<div id="resultado">--</div>
 
-<div id="adminSorteio" style="display:none;">
-  <div style="display:flex;justify-content:center;gap:10px;margin:10px;">
-    <input id="n1" style="width:45px;height:45px;border-radius:50%;text-align:center;">
-    <input id="n2" style="width:45px;height:45px;border-radius:50%;text-align:center;">
-    <input id="n3" style="width:45px;height:45px;border-radius:50%;text-align:center;">
-    <input id="n4" style="width:45px;height:45px;border-radius:50%;text-align:center;">
-  </div>
+<button onclick="sortear()">🎯 Sortear</button>
+<button onclick="admin()">🔐 Admin</button>
 
-  <button onclick="sortear()">Sortear</button>
-  <br><br>
-  <button onclick="resetarTodos()" style="background:red;color:#fff;">Resetar Tudo</button>
+<div class="admin" id="painel">
+
+    <div class="painel">
+        <b>📊 Relatório</b><br>
+        Disponíveis: <span id="disp">0</span><br>
+        Reservados: <span id="res">0</span><br>
+        Pagos: <span id="pag">0</span>
+    </div>
+
+    <div class="painel">
+        <b>💳 PIX</b><br>
+        <button onclick="copiarPix()">Copiar chave PIX</button>
+    </div>
+
+    <button onclick="resetar()">🗑 Resetar</button>
 </div>
 
-<div class="grid" id="tickets"></div>
-
-<button class="meu-botao" onclick="ativarAdmin()">ADMIN</button>
-
-<!-- POPUP -->
-<div id="janelaPix" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:999; align-items:center; justify-content:center;">
-  <div style="background:#fff; padding:20px; border-radius:10px; text-align:center; width:300px;">
-    <h3>Pagamento</h3>
-
-    <button onclick="copiarPix()" style="background:#ccc; padding:10px; margin:5px; width:100%;">Copiar chave pix ⚪️</button>
-
-    <button onclick="enviarWhats()" style="background:#25D366; color:#fff; padding:10px; margin:5px; width:100%;">WhatsApp 🟢</button>
-
-    <button onclick="fecharJanela()" style="background:red; color:#fff; padding:10px; margin:5px; width:100%;">Fechar janela 🔴</button>
-  </div>
-</div>
+<h2>Escolha seu número</h2>
+<div class="grid" id="grid"></div>
 
 <script>
-let admin=false;
-let vencedor=null;
+const numeroWhatsApp = "5511999999999"; // TROCAR
+const chavePix = "SEU-PIX-AQUI"; // TROCAR
 
-let dadosCompra = {id:"", numeros:"", nome:"", valor:"R$ 2,00"};
+let adminAtivo = false;
+let dados = JSON.parse(localStorage.getItem("bilhetes")) || {};
+let resultado = localStorage.getItem("resultado") || "--";
 
-// 🔥 CARREGAR (ADMIN RESTAURADO)
-async function carregarSistema(){
-  const res = await fetch("api.php?acao=listar");
-  const dados = await res.json();
+const grid = document.getElementById("grid");
+const rDiv = document.getElementById("resultado");
 
-  const container = document.getElementById("tickets");
-  container.innerHTML="";
+rDiv.innerText = resultado;
 
-  for(let i in dados.bilhetes){
+// CRIAR
+function criar(){
+    grid.innerHTML = "";
 
-    const b = dados.bilhetes[i];
-    if(!b) continue;
+    let disp=0,res=0,pag=0;
 
-    let html="";
-    for(let x=0;x<4;x++){
-      html += `<div class="block">${b.numeros.slice(x*4,(x+1)*4).join(" - ")}</div>`;
+    for(let i=0;i<100;i++){
+        let num = i.toString().padStart(2,'0');
+        let info = dados[num] || {status:"disponivel", nome:""};
+
+        if(info.status==="disponivel") disp++;
+        if(info.status==="reservado") res++;
+        if(info.status==="pago") pag++;
+
+        let div = document.createElement("div");
+        div.className = "bilhete " + info.status;
+        div.innerHTML = num + "<br><small>"+(info.nome||"")+"</small>";
+
+        div.onclick = () => clicar(num);
+
+        grid.appendChild(div);
     }
 
-    let div=document.createElement("div");
-    div.className="ticket";
-
-    if(vencedor == i){
-      div.style.border="4px solid gold";
-      div.style.boxShadow="0 0 20px gold";
-    }
-
-    if(b.status==="reservado"){
-      div.style.background="#fff3cd";
-
-      let btn = admin ? `
-        <button onclick="event.stopPropagation(); confirmar(${i})">✔</button>
-        <button onclick="event.stopPropagation(); resetarUm(${i})" style="background:red;color:#fff;">X</button>
-      ` : "";
-
-      div.innerHTML = `
-        <h4>🍀 Trevo da Sorte</h4>
-        <h3>Bilhete ${i}</h3>
-        <p>Reservado</p>
-        <p><strong>${b.comprador || ""}</strong></p>
-        ${btn}
-      `;
-    }
-
-    else if(b.status==="confirmado"){
-      div.style.background="#28a745";
-      div.style.color="#fff";
-
-      let btn = admin ? `
-        <button onclick="event.stopPropagation(); resetarUm(${i})" style="background:red;color:#fff;">X</button>
-      ` : "";
-
-      div.innerHTML = `
-        <h4>🍀 Trevo da Sorte</h4>
-        <h3>Bilhete ${i}</h3>
-        <p>Confirmado</p>
-        <p><strong>${b.comprador || ""}</strong></p>
-        ${btn}
-      `;
-    }
-
-    else{
-      div.innerHTML = `<h4>🍀 Trevo da Sorte</h4><h3>Bilhete ${i}</h3>${html}`;
-      div.onclick = ()=>comprar(i);
-    }
-
-    container.appendChild(div);
-  }
+    document.getElementById("disp").innerText = disp;
+    document.getElementById("res").innerText = res;
+    document.getElementById("pag").innerText = pag;
 }
 
-// 🔥 COMPRA + POPUP
-function comprar(id){
-  if(admin) return;
+// CLIQUE
+function clicar(num){
+    if(!adminAtivo){
+        window.open(`https://wa.me/${numeroWhatsApp}?text=Quero o bilhete ${num}`);
+        if(!dados[num]) dados[num]={status:"reservado", nome:""};
+    } else {
+        let nome = prompt("Nome:");
 
-  const nome = prompt("Seu nome:");
-  if(!nome) return;
+        if(!dados[num]) dados[num]={status:"disponivel", nome:""};
 
-  const ticket = [...document.querySelectorAll(".ticket")]
-    .find(t => t.innerText.includes("Bilhete " + id));
+        if(dados[num].status==="disponivel") dados[num].status="reservado";
+        else if(dados[num].status==="reservado") dados[num].status="pago";
+        else dados[num]={status:"disponivel", nome:""};
 
-  let numeros="";
-  if(ticket){
-    ticket.querySelectorAll(".block")
-      .forEach(b => numeros += b.innerText + " - ");
-    numeros = numeros.slice(0,-3);
-  }
+        if(nome) dados[num].nome=nome;
+    }
 
-  const f = new FormData();
-  f.append("id", id);
-  f.append("nome", nome);
-  fetch("api.php?acao=reservar",{method:"POST",body:f});
-
-  dadosCompra = {id, numeros, nome, valor:"R$ 2,00"};
-
-  document.getElementById("janelaPix").style.display="flex";
-
-  carregarSistema();
+    salvar();
+    criar();
 }
 
-// 🔥 PIX
-/*
+// PIX
 function copiarPix(){
-  navigator.clipboard.writeText("7c81606a-e7cc-4bce-b0c3-6c03f3363eee");
-  alert("Chave PIX copiada!");
-}
-*/
-
-function copiarPix(){
-  const chave = "7c81606a-e7cc-4bce-b0c3-6c03f3363eee";
-
-  // método moderno
-  if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(chave)
-      .then(() => alert("Chave PIX copiada!"))
-      .catch(() => copiarFallback(chave));
-  } else {
-    copiarFallback(chave);
-  }
+    navigator.clipboard.writeText(chavePix);
+    alert("PIX copiado!");
 }
 
-// 🔥 fallback universal
-function copiarFallback(texto){
-  const input = document.createElement("textarea");
-  input.value = texto;
-  document.body.appendChild(input);
-
-  input.select();
-  input.setSelectionRange(0, 99999);
-
-  document.execCommand("copy");
-  document.body.removeChild(input);
-
-  alert("Chave PIX copiada!");
+// SALVAR
+function salvar(){
+    localStorage.setItem("bilhetes", JSON.stringify(dados));
 }
 
-// 🔥 WHATSAPP
-function enviarWhats(){
-  const telefone="5598988256736";
-
-  const msg =
-`🎟️ Compra de Bilhete
-👤 Nome: ${dadosCompra.nome}
-🎫 Bilhete: ${dadosCompra.id}
-🔢 Números: ${dadosCompra.numeros}
-
-💰 Valor: ${dadosCompra.valor}
- 📸 Segue o comprovante 👇
-`;
-
-
-  window.open(`https://wa.me/${telefone}?text=${encodeURIComponent(msg)}`,"_blank");
+// ADMIN
+function admin(){
+    let s = prompt("Senha:");
+    if(s==="1234"){
+        adminAtivo=true;
+        document.getElementById("painel").style.display="block";
+    }
 }
 
-// 🔥 FECHAR
-function fecharJanela(){
-  document.getElementById("janelaPix").style.display="none";
+// RESET
+function resetar(){
+    if(confirm("Apagar tudo?")){
+        localStorage.clear();
+        dados={};
+        resultado="--";
+        rDiv.innerText="--";
+        criar();
+    }
 }
 
-// 🔥 RESTANTE ORIGINAL
-async function carregarResultado(){
-  const res = await fetch("api.php?acao=resultado");
-  const d = await res.json();
+// SORTEIO
+function sortear(){
+    if(!adminAtivo){
+        alert("Apenas admin");
+        return;
+    }
 
-  const bolas = document.getElementById("bolas");
-  bolas.innerHTML="";
+    let pagos=[];
 
-  d.numeros.forEach((n,i)=>{
-    setTimeout(()=>{
-      bolas.innerHTML += `<div class="bola">${n}</div>`;
-    }, i*300);
-  });
+    for(let n in dados){
+        if(dados[n].status==="pago") pagos.push(n);
+    }
 
-  vencedor = d.vencedor;
+    if(pagos.length===0){
+        alert("Nenhum pago");
+        return;
+    }
 
-  document.getElementById("vencedor").innerText =
-    d.vencedor ? "🏆 Bilhete vencedor: " + d.vencedor : "";
+    let i=0;
 
-  carregarSistema();
+    let anim=setInterval(()=>{
+        rDiv.innerText=Math.floor(Math.random()*100).toString().padStart(2,'0');
+        i++;
+
+        if(i>20){
+            clearInterval(anim);
+
+            let vencedor = pagos[Math.floor(Math.random()*pagos.length)];
+            rDiv.innerText="🏆 "+vencedor;
+
+            localStorage.setItem("resultado", vencedor);
+        }
+    },100);
 }
 
-function confirmar(id){
-  const f = new FormData();
-  f.append("id", id);
-  fetch("api.php?acao=confirmar",{method:"POST",body:f})
-  .then(()=>carregarSistema());
-}
-
-function resetarUm(id){
-  const f = new FormData();
-  f.append("id", id);
-  fetch("api.php?acao=resetarUm",{method:"POST",body:f})
-  .then(()=>carregarSistema());
-}
-
-function resetarTodos(){
-  if(!confirm("Resetar tudo?")) return;
-  fetch("api.php?acao=resetarTodos")
-  .then(()=>carregarSistema());
-}
-
-function ativarAdmin(){
-  if(prompt("Senha")=="1234"){
-    admin=true;
-    document.getElementById("adminSorteio").style.display="block";
-    carregarSistema();
-  }
-}
-
-async function sortear(){
-  const f = new FormData();
-  f.append("n1", n1.value);
-  f.append("n2", n2.value);
-  f.append("n3", n3.value);
-  f.append("n4", n4.value);
-
-  await fetch("api.php?acao=sortear",{method:"POST",body:f});
-  carregarResultado();
-}
-
-carregarSistema();
-carregarResultado();
+criar();
 </script>
 
 </body>
