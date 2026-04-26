@@ -48,13 +48,13 @@ header {
     font-size:50px;
     margin:20px;
 }
-
+/*
 .painel {
     background:#000;
     padding:10px;
     margin:10px;
 }
-
+*/
 button {
     padding:10px;
     margin:5px;
@@ -71,6 +71,12 @@ button {
 
 <h2>🎥 Sorteio</h2>
 <div id="resultado">--</div>
+    
+    
+<div class="painel">
+        <b>💳 PIX</b><br>
+        <button onclick="copiarPix()">Copiar chave PIX</button>
+</div>
 
 <button onclick="sortear()">🎯 Sortear</button>
 <button onclick="admin()">🔐 Admin</button>
@@ -83,11 +89,13 @@ button {
         Reservados: <span id="res">0</span><br>
         Pagos: <span id="pag">0</span>
     </div>
-
+<!--
     <div class="painel">
         <b>💳 PIX</b><br>
         <button onclick="copiarPix()">Copiar chave PIX</button>
     </div>
+
+    -->
 
     <button onclick="resetar()">🗑 Resetar</button>
 </div>
@@ -139,7 +147,7 @@ function criar(){
 // CLIQUE
 function clicar(num){
     if(!adminAtivo){
-        window.open(`https://wa.me/${numeroWhatsApp}?text=Quero o bilhete ${num}`);
+        window.open(`https://wa.me/${numeroWhatsApp}?text=Quero o bilhete ${num} 📸 Segue o comprovante 👇`);
         if(!dados[num]) dados[num]={status:"reservado", nome:""};
     } else {
         let nome = prompt("Nome:");
