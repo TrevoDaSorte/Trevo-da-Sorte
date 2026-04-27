@@ -2,233 +2,318 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>🍀 Rifa da Sorte ✨️💰 </title>
+<title>🍀 Rifa da Sorte 💰</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body {
-    font-family: Arial;
-    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-    color:#fff;
-    text-align:center;
-    margin:0;
-}
-
-header {
-    background:#000;
-    padding:15px;
-    font-size:22px;
-}
-
-.grid {
-    display:grid;
-    grid-template-columns:repeat(10,1fr);
-    gap:8px;
-    padding:15px;
-}
-
-.bilhete {
-    padding:12px;
-    border-radius:6px;
-    cursor:pointer;
-    font-weight:bold;
-}
-
+body { font-family: Arial; background: linear-gradient(135deg,#0f2027,#203a43,#2c5364); color:#fff; text-align:center; margin:0; overflow-x:hidden; }
+header { background:#000; padding:15px; font-size:22px; position:sticky; top:0; }
+.grid { display:grid; grid-template-columns:repeat(10,1fr); gap:8px; padding:15px; }
+.bilhete { padding:12px; border-radius:6px; cursor:pointer; font-weight:bold; }
 .disponivel { background:#2ecc71; }
-.reservado { background:#f1c40f; color:#000; }
-.pago { background:#e74c3c; }
+.reservado { background:#f1c40f; color:#000; cursor:not-allowed; }
+.pago { background:#e74c3c; cursor:not-allowed; }
+.admin { display:none; background:#111; padding:10px; }
+#resultado { font-size:50px; }
+#timer { font-size:40px; }
 
-.admin {
-    display:none;
-    background:#111;
-    padding:10px;
-}
+@keyframes pulo {0%{transform:scale(1);}50%{transform:scale(1.6);}100%{transform:scale(1);}}
+@keyframes piscar {0%,100%{opacity:1;}50%{opacity:0.3;}}
 
-#resultado {
-    font-size:50px;
-    margin:20px;
-}
-/*
-.painel {
-    background:#000;
-    padding:10px;
-    margin:10px;
-}
-*/
-button {
-    padding:10px;
-    margin:5px;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-}
+.confete { position:fixed; width:8px; height:8px; top:-10px; animation: cair linear forwards; }
+@keyframes cair { to { transform: translateY(100vh); opacity:0; } }
 </style>
 </head>
 
 <body>
 
-<header>🍀 Rifa da Sorte ✨️💰</header>
+<header>🍀 Rifa da Sorte v0.1 💰</header>
 
+<div style="display:flex; justify-content:center; gap:30px; margin-top:20px;">
+<div>
 <h2>🎥 Sorteio</h2>
 <div id="resultado">--</div>
-    
-    
-<div class="painel">
-        <b>💳 PIX</b><br>
-        <button onclick="copiarPix()">Copiar chave PIX</button>
 </div>
+<div id="timer">00:10</div>
+</div>
+
+<div id="efeito" style="display:none; font-size:50px;">💰💰💰</div>
+
+<!--
+<audio id="somMoeda" src="https://www.soundjay.com/misc/sounds/coins-01.mp3"></audio>
+-->
+
+
+
+<audio id="somMoeda" src="https://www.zedge.net/notification-sounds/70336987-e8ff-4038-b632-e170728adff8"></audio>
 
 <button onclick="sortear()">🎯 Sortear</button>
 <button onclick="admin()">🔐 Admin</button>
+<button onclick="compartilhar()">📲 Compartilhar</button>
+<button onclick="copiarPix()">Copiar Pix</button>
 
 <div class="admin" id="painel">
+📊 Disponíveis: <span id="disp">0</span> |
+Reservados: <span id="res">0</span> |
+Pagos: <span id="pag">0</span>
+<br><button onclick="resetar()">🗑 Resetar</button>
+</div>
 
-    <div class="painel">
-        <b>📊 Relatório</b><br>
-        Disponíveis: <span id="disp">0</span><br>
-        Reservados: <span id="res">0</span><br>
-        Pagos: <span id="pag">0</span>
-    </div>
-<!--
-    <div class="painel">
-        <b>💳 PIX</b><br>
-        <button onclick="copiarPix()">Copiar chave PIX</button>
-    </div>
-
-    -->
-
-    <button onclick="resetar()">🗑 Resetar</button>
+<button onclick="toggleLista()">👥 Ver Compradores</button>
+<div id="listaBox" style="display:none;">
+<h2>👥 Compradores</h2>
+<div id="lista"></div>
 </div>
 
 <h2>Escolha seu número</h2>
 <div class="grid" id="grid"></div>
 
 <script>
-const numeroWhatsApp = "5598988256736"; // TROCAR
-const chavePix = "7c81606a-e7cc-4bce-b0c3-6c03f3363eee"; // TROCAR
+const numeroWhatsApp = "5598988256736";
+const chavePix = "7c81606a-e7cc-4bce-b0c3-6c03f3363eee";
+const valorPremio = "300 reais";
 
 let adminAtivo = false;
 let dados = JSON.parse(localStorage.getItem("bilhetes")) || {};
 let resultado = localStorage.getItem("resultado") || "--";
 
+let tempo = 10;
+let intervalo = null;
+
 const grid = document.getElementById("grid");
 const rDiv = document.getElementById("resultado");
+const listaDiv = document.getElementById("lista");
+const timerDiv = document.getElementById("timer");
 
 rDiv.innerText = resultado;
 
-// CRIAR
+/* ===== GRAVAÇÃO INVISÍVEL =====*/
+let canvas = document.createElement("canvas");
+canvas.width = 400;
+canvas.height = 200;
+let ctx = canvas.getContext("2d");
+
+let stream = canvas.captureStream(30);
+let recorder = new MediaRecorder(stream);
+let chunks = [];
+
+recorder.ondataavailable = e => chunks.push(e.data);
+
+
+recorder.onstop = () => { /*
+    
+  let blob = new Blob(chunks,{type:'video/webm'});
+  let a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sorteio.webm';
+  a.click();
+  chunks=[];
+  */
+};
+
+function desenharCanvas(txt){
+  ctx.fillStyle="#000";
+  ctx.fillRect(0,0,400,200);
+  ctx.fillStyle="#00ff88";
+  ctx.font="bold 40px Arial";
+  ctx.textAlign="center";
+  ctx.fillText(txt,200,110);
+}
+
+
+
+function falarPremio(nome, num){
+  let msg = new SpeechSynthesisUtterance(
+    `Parabéns ${nome || "ganhador"}! Número ${num}. Você ganhou ${valorPremio}`
+  );
+  msg.lang="pt-BR";
+  msg.pitch=1.2;
+  msg.rate=0.9;
+  speechSynthesis.speak(msg);
+}
+
+/* ===== RESTO DO SISTEMA (INALTERADO) ===== */
+
+function iniciarTimer(callback){
+  clearInterval(intervalo);
+  tempo = 10;
+
+  intervalo = setInterval(()=>{
+    tempo--;
+    timerDiv.innerText = `00:${tempo.toString().padStart(2,'0')}`;
+
+    if(tempo <= 3){ timerDiv.style.animation = "piscar 0.5s infinite"; }
+
+    if(tempo <= 0){
+      clearInterval(intervalo);
+      timerDiv.style.animation = "none";
+      callback();
+    }
+  },1000);
+}
+
+function confete(){
+  for(let i=0;i<80;i++){
+    let c = document.createElement("div");
+    c.className = "confete";
+    c.style.left = Math.random()*100+"vw";
+    c.style.background = ["#f1c40f","#e74c3c","#2ecc71","#3498db"][Math.floor(Math.random()*4)];
+    c.style.animationDuration = (Math.random()*2+2)+"s";
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),4000);
+  }
+}
+
+function compartilhar(){
+  let texto = `🏆 Número sorteado: ${resultado}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`);
+}
+
+function toggleLista(){
+  let box = document.getElementById("listaBox");
+  box.style.display = box.style.display === "none" ? "block" : "none";
+}
+
 function criar(){
-    grid.innerHTML = "";
+  grid.innerHTML="";
+  listaDiv.innerHTML="";
 
-    let disp=0,res=0,pag=0;
+  let disp=0,res=0,pag=0;
 
-    for(let i=0;i<250;i++){
-        let num = i.toString().padStart(2,'0');
-        let info = dados[num] || {status:"disponivel", nome:""};
+  for(let i=0;i<250;i++){
+    let num = i.toString().padStart(2,'0');
+    let info = dados[num] || {status:"disponivel", nome:""};
 
-        if(info.status==="disponivel") disp++;
-        if(info.status==="reservado") res++;
-        if(info.status==="pago") pag++;
+    if(info.status==="disponivel") disp++;
+    if(info.status==="reservado") res++;
+    if(info.status==="pago") pag++;
 
-        let div = document.createElement("div");
-        div.className = "bilhete " + info.status;
-        div.innerHTML = num + "<br><small>"+(info.nome||"")+"</small>";
-
-        div.onclick = () => clicar(num);
-
-        grid.appendChild(div);
+    if(info.status === "pago"){
+      listaDiv.innerHTML += `${num} - ${info.nome}<br>`;
     }
 
-    document.getElementById("disp").innerText = disp;
-    document.getElementById("res").innerText = res;
-    document.getElementById("pag").innerText = pag;
+    let div = document.createElement("div");
+    div.className = "bilhete " + info.status;
+    div.innerHTML = num + "<br><small>"+(info.nome||"")+"</small>";
+    div.onclick = () => clicar(num);
+
+    grid.appendChild(div);
+  }
+
+  document.getElementById("disp").innerText = disp;
+  document.getElementById("res").innerText = res;
+  document.getElementById("pag").innerText = pag;
 }
 
-// CLIQUE
 function clicar(num){
-    if(!adminAtivo){
-        window.open(`https://wa.me/${numeroWhatsApp}?text=Quero o bilhete ${num} 📸 Segue o comprovante 👇`);
-        if(!dados[num]) dados[num]={status:"reservado", nome:""};
-    } else {
-        let nome = prompt("Nome:");
+  let info = dados[num];
 
-        if(!dados[num]) dados[num]={status:"disponivel", nome:""};
+  if(!adminAtivo && info && info.status !== "disponivel"){
+    alert("Número indisponível");
+    return;
+  }
 
-        if(dados[num].status==="disponivel") dados[num].status="reservado";
-        else if(dados[num].status==="reservado") dados[num].status="pago";
-        else dados[num]={status:"disponivel", nome:""};
+  if(!adminAtivo){
+    window.open(`https://wa.me/${numeroWhatsApp}?text=Quero o bilhete ${num}  📸 Segue o comprovante 👇`);
+    if(!dados[num]) dados[num]={status:"reservado", nome:""};
+    salvarLocal();
+  } else {
+    let nome = prompt("Nome:");
+    if(!dados[num]) dados[num]={status:"disponivel", nome:""};
 
-        if(nome) dados[num].nome=nome;
-    }
+    if(dados[num].status==="disponivel") dados[num].status="reservado";
+    else if(dados[num].status==="reservado") dados[num].status="pago";
+    else dados[num]={status:"disponivel", nome:""};
 
-    salvar();
-    criar();
+    if(nome) dados[num].nome=nome;
+    salvarLocal();
+  }
+
+  criar();
 }
 
-// PIX
+function salvarLocal(){
+  localStorage.setItem("bilhetes", JSON.stringify(dados));
+  localStorage.setItem("resultado", resultado);
+}
+
 function copiarPix(){
-    navigator.clipboard.writeText(chavePix);
-    alert("PIX copiado!");
+  navigator.clipboard.writeText(chavePix);
+  alert("PIX copiado!");
 }
 
-// SALVAR
-function salvar(){
-    localStorage.setItem("bilhetes", JSON.stringify(dados));
-}
-
-// ADMIN
 function admin(){
-    let s = prompt("Senha:");
-    if(s==="1234@#$%"){
-        adminAtivo=true;
-        document.getElementById("painel").style.display="block";
-    }
+  let s = prompt("Senha:");
+  if(s==="1234@#$%"){
+    adminAtivo=true;
+    document.getElementById("painel").style.display="block";
+  }
 }
 
-// RESET
 function resetar(){
-    if(confirm("Apagar tudo?")){
-        localStorage.clear();
-        dados={};
-        resultado="--";
-        rDiv.innerText="--";
-        criar();
-    }
+  if(confirm("Apagar tudo?")){
+    localStorage.clear();
+    dados={}; resultado="--";
+    rDiv.innerText="--";
+    criar();
+  }
 }
 
-// SORTEIO
+/* ===== SORTEIO TURBINADO ===== */
+
 function sortear(){
-    if(!adminAtivo){
-        alert("Apenas admin");
-        return;
-    }
+  if(!adminAtivo){ alert("Apenas admin"); return; }
 
+  iniciarTimer(()=>{
     let pagos=[];
+    for(let n in dados){ if(dados[n].status==="pago") pagos.push(n); }
 
-    for(let n in dados){
-        if(dados[n].status==="pago") pagos.push(n);
-    }
+    if(pagos.length===0){ alert("Nenhum pago"); return; }
 
-    if(pagos.length===0){
-        alert("Nenhum pago");
-        return;
-    }
+    recorder.start();
 
     let i=0;
 
     let anim=setInterval(()=>{
-        rDiv.innerText=Math.floor(Math.random()*100).toString().padStart(2,'0');
-        i++;
+      let fake=Math.floor(Math.random()*100).toString().padStart(2,'0');
 
-        if(i>20){
-            clearInterval(anim);
+      rDiv.innerText=fake;
+      desenharCanvas(fake);
 
-            let vencedor = pagos[Math.floor(Math.random()*pagos.length)];
-            rDiv.innerText="🏆 "+vencedor;
+      i++;
 
-            localStorage.setItem("resultado", vencedor);
-        }
+      if(i>25){
+        clearInterval(anim);
+
+        let vencedor=pagos[Math.floor(Math.random()*pagos.length)];
+        let nome=dados[vencedor]?.nome || "Ganhador";
+
+        rDiv.innerText="🏆 "+vencedor;
+        resultado=vencedor;
+        salvarLocal();
+
+        desenharCanvas("GANHADOR "+vencedor);
+
+        let som=document.getElementById("somMoeda");
+        som.currentTime=0;
+        som.play();
+
+        confete();
+
+        let efeito=document.getElementById("efeito");
+        efeito.style.display="block";
+        efeito.style.animation="pulo 0.5s ease 6";
+
+        setTimeout(()=>{ falarPremio(nome, vencedor); },1500);
+
+        setTimeout(()=>{
+          recorder.stop();
+          efeito.style.display="none";
+        },5000);
+      }
+
     },100);
+  });
 }
 
 criar();
