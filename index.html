@@ -86,42 +86,20 @@ async function carregarOnline(){
   const res = await fetch(API_URL);
   const lista = await res.json();
 
-  dados = {};
+  let novo = {};
 
   lista.forEach(item => {
-    dados[item.numero] = {
+    novo[item.numero] = {
       status: item.status,
       nome: item.nome
     };
   });
 
+  dados = novo;
   criar();
 }
 
 /* ===== SALVAR ONLINE ===== */
-
-
-  /*
-function salvarLocal(){
-  let lista = [];
-
-  for(let n in dados){
-    lista.push({
-      numero: n,
-      status: dados[n].status,
-      nome: dados[n].nome
-    });
-  }
-
-  fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify(lista)
-  });
-}
-*/
-
-let salvando = false;
-
 async function salvarLocal(){
   let lista = [];
 
@@ -133,16 +111,18 @@ async function salvarLocal(){
     });
   }
 
-  await fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify(lista)
-  });
+  try{
+    await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify(lista)
+    });
 
-  // 🔥 pequena pausa pra planilha atualizar
-  setTimeout(carregarOnline, 1000);
+    setTimeout(carregarOnline, 1500);
+
+  }catch(e){
+    console.log("Erro ao salvar:", e);
+  }
 }
-
-  
 
 /* ===== RESTO DO SISTEMA ===== */
 
@@ -227,7 +207,13 @@ function clicar(num){
 
   if(!adminAtivo){
     window.open(`https://wa.me/${numeroWhatsApp}?text=Quero o bilhete ${num}`);
-    if(!dados[num]) dados[num]={status:"reservado", nome:""};
+
+    // ✅ CORREÇÃO PRINCIPAL
+    dados[num] = {
+      status: "reservado",
+      nome: dados[num]?.nome || ""
+    };
+
     salvarLocal();
   } else {
     let nome = prompt("Nome:");
@@ -286,18 +272,8 @@ function sortear(){
 }
 
 /* ===== INICIAR ===== */
-  
 carregarOnline();
-/*
-  setInterval(()=>{
-  if(!salvando){
-    carregarOnline();
-  }
-}, 3000);
-  */
-  
 setInterval(carregarOnline, 5000);
-
 
 </script>
 
