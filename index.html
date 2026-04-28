@@ -99,6 +99,9 @@ async function carregarOnline(){
 }
 
 /* ===== SALVAR ONLINE ===== */
+
+
+  /*
 function salvarLocal(){
   let lista = [];
 
@@ -115,6 +118,34 @@ function salvarLocal(){
     body: JSON.stringify(lista)
   });
 }
+*/
+
+let salvando = false;
+
+async function salvarLocal(){
+  salvando = true;
+
+  let lista = [];
+
+  for(let n in dados){
+    lista.push({
+      numero: n,
+      status: dados[n].status,
+      nome: dados[n].nome
+    });
+  }
+
+  await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify(lista)
+  });
+
+  setTimeout(()=>{
+    salvando = false;
+  }, 1500);
+}
+
+  
 
 /* ===== RESTO DO SISTEMA ===== */
 
@@ -259,7 +290,16 @@ function sortear(){
 
 /* ===== INICIAR ===== */
 carregarOnline();
+
+  setInterval(()=>{
+  if(!salvando){
+    carregarOnline();
+  }
+}, 3000);
+  
+  /*
 setInterval(carregarOnline, 3000);
+*/
 
 </script>
 
