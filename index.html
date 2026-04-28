@@ -123,8 +123,6 @@ function salvarLocal(){
 let salvando = false;
 
 async function salvarLocal(){
-  salvando = true;
-
   let lista = [];
 
   for(let n in dados){
@@ -140,9 +138,8 @@ async function salvarLocal(){
     body: JSON.stringify(lista)
   });
 
-  setTimeout(()=>{
-    salvando = false;
-  }, 1500);
+  // 🔥 pequena pausa pra planilha atualizar
+  setTimeout(carregarOnline, 1000);
 }
 
   
@@ -289,17 +286,18 @@ function sortear(){
 }
 
 /* ===== INICIAR ===== */
+  
 carregarOnline();
-
+/*
   setInterval(()=>{
   if(!salvando){
     carregarOnline();
   }
 }, 3000);
+  */
   
-  /*
-setInterval(carregarOnline, 3000);
-*/
+setInterval(carregarOnline, 5000);
+
 
 </script>
 
