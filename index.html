@@ -86,16 +86,13 @@ async function carregarOnline(){
   const res = await fetch(API_URL);
   const lista = await res.json();
 
-  let novo = {};
-
   lista.forEach(item => {
-    novo[item.numero] = {
+    dados[item.numero] = {
       status: item.status,
       nome: item.nome
     };
   });
 
-  dados = novo;
   criar();
 }
 
