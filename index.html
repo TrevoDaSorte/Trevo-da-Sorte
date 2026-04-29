@@ -197,24 +197,42 @@ function criar(){
   document.getElementById("pag").innerText = pag;
 }
 
-function clicar(num){
+
+
+async function clicar(num){
   let info = dados[num];
 
+  // 🔒 bloqueio imediato
   if(!adminAtivo && info && info.status !== "disponivel"){
     alert("Número indisponível");
     return;
   }
 
   if(!adminAtivo){
-    window.open(`https://wa.me/${numeroWhatsApp}?text=Quero o bilhete ${num}`);
 
-    // ✅ CORREÇÃO PRINCIPAL
+    // 🔥 VERIFICA ONLINE ANTES DE RESERVAR
+    await carregarOnline();
+
+    let atualizado = dados[num];
+
+    if(atualizado && atualizado.status !== "disponivel"){
+      alert("Alguém pegou esse número agora!");
+      criar();
+      return;
+    }
+
+    // 🔒 agora sim reserva
     dados[num] = {
       status: "reservado",
       nome: dados[num]?.nome || ""
     };
 
+    criar(); // atualiza tela na hora
+
+    window.open(`https://wa.me/${numeroWhatsApp}?text=Quero o bilhete ${num}`);
+
     salvarLocal();
+
   } else {
     let nome = prompt("Nome:");
     if(!dados[num]) dados[num]={status:"disponivel", nome:""};
@@ -224,11 +242,18 @@ function clicar(num){
     else dados[num]={status:"disponivel", nome:""};
 
     if(nome) dados[num].nome=nome;
+
+    criar();
     salvarLocal();
   }
-
-  criar();
 }
+
+
+
+
+
+
+
 
 function copiarPix(){
   navigator.clipboard.writeText(chavePix);
