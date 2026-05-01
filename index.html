@@ -39,9 +39,9 @@ header { background:#000; padding:15px; font-size:22px; position:sticky; top:0; 
 
 <div id="efeito" style="display:none; font-size:50px;">💰💰💰</div>
 
-<!-- 🎧 Áudios -->
-<audio id="somMoeda" src="MoedPicPay.mp3" preload="auto"></audio>
-<audio id="somMoeda2" src="aplausos.mp3" preload="auto"></audio>
+<!-- Áudios -->
+<audio id="somMoeda" src="MoedPicPay.mp3"></audio>
+<audio id="somMoeda2" src="aplausos.mp3"></audio>
 
 <button onclick="sortear()">🎯 Sortear</button>
 <button onclick="admin()">🔐 Admin</button>
@@ -56,9 +56,8 @@ Pagos: <span id="pag">0</span>
 
 <br><br>
 💰 Valor do prêmio:
-<input type="text" id="valorInput" placeholder="Ex: 500 reais">
+<input type="text" id="valorInput">
 <button onclick="salvarValor()">Salvar</button>
-
 </div>
 
 <button onclick="toggleLista()">👥 Ver Compradores</button>
@@ -70,41 +69,32 @@ Pagos: <span id="pag">0</span>
 <h2>Escolha seu número</h2>
 <div class="grid" id="grid"></div>
 
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
 <script>
+// CONFIG FIREBASE
+const firebaseConfig = {
+  apiKey: "AIzaSyDnsa34KhQ3wOlt8QoBeSMCbjpnwC-d3w0",
+  authDomain: "trevodasorte-23ef1.firebaseapp.com",
+  projectId: "trevodasorte-23ef1",
+  storageBucket: "trevodasorte-23ef1.firebasestorage.app",
+  messagingSenderId: "516910223603",
+  appId: "1:516910223603:web:cafb46c94ef9580bc7a786"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// CONFIG
 const numeroWhatsApp = "5598988256736";
 const chavePix = "7c81606a-e7cc-4bce-b0c3-6c03f3363eee";
-/*
-const valorPremio = "300 reais";
-
-
-
-
-*/
-
-
-
-let valorPremio = localStorage.getItem("valorPremio") || "300 reais";
-
-
-
-
-
-function salvarValor(){
-  let novo = document.getElementById("valorInput").value;
-  if(novo){
-    valorPremio = novo;
-    localStorage.setItem("valorPremio", valorPremio);
-    alert("Valor atualizado!");
-  }
-}
-
-
-
-
 
 let adminAtivo = false;
-let dados = JSON.parse(localStorage.getItem("bilhetes")) || {};
-let resultado = localStorage.getItem("resultado") || "--";
+let dados = {};
+let resultado = "--";
+let valorPremio = "300 reais";
 
 let tempo = 10;
 let intervalo = null;
@@ -114,8 +104,39 @@ const rDiv = document.getElementById("resultado");
 const listaDiv = document.getElementById("lista");
 const timerDiv = document.getElementById("timer");
 
-rDiv.innerText = resultado;
+// TEMPO REAL
+db.collection("rifa").doc("dados").onSnapshot((doc)=>{
+  if(doc.exists){
+    const data = doc.data();
+    dados = data.bilhetes || {};
+    resultado = data.resultado || "--";
+    valorPremio = data.valor || "300 reais";
 
+    rDiv.innerText = resultado;
+    criar();
+  }
+});
+
+// SALVAR
+function salvarFirebase(){
+  db.collection("rifa").doc("dados").set({
+    bilhetes: dados,
+    resultado: resultado,
+    valor: valorPremio
+  });
+}
+
+// VALOR
+function salvarValor(){
+  let novo = document.getElementById("valorInput").value;
+  if(novo){
+    valorPremio = novo;
+    salvarFirebase();
+    alert("Valor atualizado!");
+  }
+}
+
+// VOZ
 function falarPremio(nome, num){
   let msg = new SpeechSynthesisUtterance(
     `Parabéns ${nome || "ganhador"}! Número ${num}. Você ganhou ${valorPremio}`
@@ -124,6 +145,7 @@ function falarPremio(nome, num){
   speechSynthesis.speak(msg);
 }
 
+// TIMER
 function iniciarTimer(callback){
   clearInterval(intervalo);
   tempo = 10;
@@ -142,6 +164,7 @@ function iniciarTimer(callback){
   },1000);
 }
 
+// CONFETE
 function confete(){
   for(let i=0;i<80;i++){
     let c = document.createElement("div");
@@ -154,6 +177,7 @@ function confete(){
   }
 }
 
+// SHARE
 function compartilhar(){
   let texto = `🏆 Número sorteado: ${resultado}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`);
@@ -164,6 +188,7 @@ function toggleLista(){
   box.style.display = box.style.display === "none" ? "block" : "none";
 }
 
+// GRID
 function criar(){
   grid.innerHTML="";
   listaDiv.innerHTML="";
@@ -195,6 +220,7 @@ function criar(){
   document.getElementById("pag").innerText = pag;
 }
 
+// CLIQUE
 function clicar(num){
   let info = dados[num];
 
@@ -206,7 +232,6 @@ function clicar(num){
   if(!adminAtivo){
     window.open(`https://wa.me/${numeroWhatsApp}?text=Quero o bilhete ${num}`);
     if(!dados[num]) dados[num]={status:"reservado", nome:""};
-    salvarLocal();
   } else {
     let nome = prompt("Nome:");
     if(!dados[num]) dados[num]={status:"disponivel", nome:""};
@@ -216,41 +241,29 @@ function clicar(num){
     else dados[num]={status:"disponivel", nome:""};
 
     if(nome) dados[num].nome=nome;
-    salvarLocal();
   }
 
-  criar();
+  salvarFirebase();
 }
 
-function salvarLocal(){
-  localStorage.setItem("bilhetes", JSON.stringify(dados));
-  localStorage.setItem("resultado", resultado);
-}
-
-function copiarPix(){
-  navigator.clipboard.writeText(chavePix);
-  alert("PIX copiado!");
-}
-
+// ADMIN
 function admin(){
   let s = prompt("Senha:");
   if(s==="1234@#$%"){
     adminAtivo=true;
-    
     document.getElementById("painel").style.display="block";
     document.getElementById("valorInput").value = valorPremio;
   }
 }
 
+// RESET
 function resetar(){
   if(confirm("Apagar tudo?")){
-    localStorage.clear();
-    dados={}; resultado="--";
-    rDiv.innerText="--";
-    criar();
+    db.collection("rifa").doc("dados").delete();
   }
 }
 
+// SORTEIO
 function sortear(){
   if(!adminAtivo){ alert("Apenas admin"); return; }
 
@@ -273,26 +286,20 @@ function sortear(){
         let vencedor=pagos[Math.floor(Math.random()*pagos.length)];
         let nome=dados[vencedor]?.nome || "Ganhador";
 
-        rDiv.innerText="🏆 "+vencedor;
         resultado=vencedor;
-        salvarLocal();
+        rDiv.innerText="🏆 "+vencedor;
 
-        // 🎧 SONS AJUSTADOS
+        salvarFirebase();
+
         let moeda = document.getElementById("somMoeda");
         let aplauso = document.getElementById("somMoeda2");
 
         moeda.currentTime = 0;
         aplauso.currentTime = 0;
-        
-        // 🔊 volume do aplauso mais baixo
-        aplauso.volume = 0.3; // 30% do volume
+        aplauso.volume = 0.3;
 
-        moeda.play().catch(e => console.log(e));
-
-        // aplauso entra antes do fim
-        setTimeout(() => {
-          aplauso.play().catch(e => console.log(e));
-        }, 1000);
+        moeda.play();
+        setTimeout(()=>aplauso.play(),1000);
 
         confete();
 
@@ -304,8 +311,6 @@ function sortear(){
     },100);
   });
 }
-
-criar();
 </script>
 
 </body>
