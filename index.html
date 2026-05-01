@@ -53,6 +53,12 @@ header { background:#000; padding:15px; font-size:22px; position:sticky; top:0; 
 Reservados: <span id="res">0</span> |
 Pagos: <span id="pag">0</span>
 <br><button onclick="resetar()">🗑 Resetar</button>
+
+<br><br>
+💰 Valor do prêmio:
+<input type="text" id="valorInput" placeholder="Ex: 500 reais">
+<button onclick="salvarValor()">Salvar</button>
+
 </div>
 
 <button onclick="toggleLista()">👥 Ver Compradores</button>
@@ -67,7 +73,34 @@ Pagos: <span id="pag">0</span>
 <script>
 const numeroWhatsApp = "5598988256736";
 const chavePix = "7c81606a-e7cc-4bce-b0c3-6c03f3363eee";
+/*
 const valorPremio = "300 reais";
+
+
+
+
+*/
+
+
+
+let valorPremio = localStorage.getItem("valorPremio") || "300 reais";
+
+
+
+
+
+function salvarValor(){
+  let novo = document.getElementById("valorInput").value;
+  if(novo){
+    valorPremio = novo;
+    localStorage.setItem("valorPremio", valorPremio);
+    alert("Valor atualizado!");
+  }
+}
+
+
+
+
 
 let adminAtivo = false;
 let dados = JSON.parse(localStorage.getItem("bilhetes")) || {};
@@ -203,7 +236,9 @@ function admin(){
   let s = prompt("Senha:");
   if(s==="1234@#$%"){
     adminAtivo=true;
+    
     document.getElementById("painel").style.display="block";
+    document.getElementById("valorInput").value = valorPremio;
   }
 }
 
