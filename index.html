@@ -259,7 +259,16 @@ function admin(){
 // RESET
 function resetar(){
   if(confirm("Apagar tudo?")){
-    db.collection("rifa").doc("dados").delete();
+
+    dados = {};
+    resultado = "--";
+
+    db.collection("rifa").doc("dados").set({
+      bilhetes: {},
+      resultado: "--",
+      valor: valorPremio
+    });
+
   }
 }
 
