@@ -54,6 +54,8 @@ Reservados: <span id="res">0</span> |
 Pagos: <span id="pag">0</span>
 <br><button onclick="resetar()">🗑 Resetar</button>
 
+<button onclick="limparResultado()">🧹 Limpar Resultado</button>
+
 <br><br>
 💰 Valor do prêmio:
 <input type="text" id="valorInput">
@@ -73,6 +75,33 @@ Pagos: <span id="pag">0</span>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
+
+<script>
+function limparResultado(){
+  if(!adminAtivo){
+    alert("Apenas admin");
+    return;
+  }
+
+  if(confirm("Deseja limpar apenas o número sorteado?")){
+
+    resultado = "--";
+
+    // Atualiza na tela
+    document.getElementById("resultado").innerText = "--";
+
+    // Salva no Firebase sem mexer nos participantes
+    db.collection("rifa").doc("dados").update({
+      resultado: "--"
+    });
+
+    alert("Resultado limpo! Pode sortear novamente.");
+  }
+}
+</script>
+
+
+  
 <script>
 // CONFIG FIREBASE
 const firebaseConfig = {
