@@ -55,7 +55,7 @@ Pagos: <span id="pag">0</span>
 <br><button onclick="resetar()">🗑 Resetar</button>
 
 <button onclick="limparResultado()">🧹 Limpar Resultado</button>
-
+<button onclick="baixarBackup()">📥 Baixar Backup</button>
 <br><br>
 💰 Valor do prêmio:
 <input type="text" id="valorInput">
@@ -76,6 +76,49 @@ Pagos: <span id="pag">0</span>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 
+
+
+
+<script>
+async function baixarBackup() {
+  const db = firebase.firestore();
+
+  let backup = {};
+
+  try {
+    const snapshot = await db.collection("rifa").get();
+
+    backup["rifa"] = {};
+
+    snapshot.forEach(doc => {
+      backup["rifa"][doc.id] = doc.data();
+    });
+
+    const blob = new Blob(
+      [JSON.stringify(backup, null, 2)],
+      { type: "application/json" }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "backup.json";
+    a.click();
+
+    console.log("✅ Backup baixado!");
+  } catch (erro) {
+    console.error("Erro no backup:", erro);
+    alert("Erro ao gerar backup");
+  }
+}
+</script>
+
+
+
+
+
+
+  
 <script>
 function limparResultado(){
   if(!adminAtivo){
