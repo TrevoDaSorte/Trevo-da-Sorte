@@ -58,14 +58,13 @@ Pagos: <span id="pag">0</span>
   
 <input type="file" id="fileInput" accept=".json">
 <button onclick="restaurarBackup()">♻️ Restaurar Backup</button>
-
 <br><br>
 💰 Valor do prêmio:
 <input type="text" id="valorInput">
 <button onclick="salvarValor()">Salvar</button>
 
 <br><br>
-🎯 Número vencedor:
+🍀
 <input type="text" id="numeroVencedor" placeholder="Ex: 07">
 <button onclick="salvarNumeroVencedor()">Salvar</button>
 </div>
@@ -83,21 +82,61 @@ Pagos: <span id="pag">0</span>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <script>
-// CONFIG FIREBASE
+async function restaurarBackup() {
+  const file = document.getElementById("fileInput").files[0];
+  if (!file) return alert("Selecione um arquivo JSON primeiro!");
+  const reader = new FileReader();
+  reader.onload = async function(event) {
+    const data = JSON.parse(event.target.result);
+    const db = firebase.firestore();
+    try {
+      for (const colecao in data) {
+        for (const docId in data[colecao]) {
+          await db.collection(colecao).doc(docId).set(data[colecao][docId]);
+        }
+      }
+      alert("✅ Backup restaurado!");
+    } catch (erro) {
+      alert("Erro ao restaurar");
+    }
+  };
+  reader.readAsText(file);
+}
+
+async function baixarBackup() {
+  const db = firebase.firestore();
+  let backup = {};
+  const snapshot = await db.collection("rifa").get();
+  backup["rifa"] = {};
+  snapshot.forEach(doc => {
+    backup["rifa"][doc.id] = doc.data();
+  });
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "backup.json";
+  a.click();
+}
+
+function limparResultado(){
+  if(!adminAtivo) return alert("Apenas admin");
+  resultado = "--";
+  document.getElementById("resultado").innerText = "--";
+  db.collection("rifa").doc("dados").update({ resultado: "--" });
+}
+
+// FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyDnsa34KhQ3wOlt8QoBeSMCbjpnwC-d3w0",
   authDomain: "trevodasorte-23ef1.firebaseapp.com",
-  projectId: "trevodasorte-23ef1",
-  storageBucket: "trevodasorte-23ef1.firebasestorage.app",
-  messagingSenderId: "516910223603",
-  appId: "1:516910223603:web:cafb46c94ef9580bc7a786"
+  projectId: "trevodasorte-23ef1"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 const numeroWhatsApp = "5598988256736";
-const chavePix = "7c81606a-e7cc-4bce-b0c3-6c03f3363eee";
 
 let adminAtivo = false;
 let dados = {};
@@ -113,7 +152,6 @@ const rDiv = document.getElementById("resultado");
 const listaDiv = document.getElementById("lista");
 const timerDiv = document.getElementById("timer");
 
-// TEMPO REAL
 db.collection("rifa").doc("dados").onSnapshot((doc)=>{
   if(doc.exists){
     const data = doc.data();
@@ -121,13 +159,11 @@ db.collection("rifa").doc("dados").onSnapshot((doc)=>{
     resultado = data.resultado || "--";
     valorPremio = data.valor || "300 reais";
     numeroVencedorAdmin = data.numeroVencedor || null;
-
     rDiv.innerText = resultado;
     criar();
   }
 });
 
-// SALVAR
 function salvarFirebase(){
   db.collection("rifa").doc("dados").set({
     bilhetes: dados,
@@ -142,11 +178,10 @@ function salvarNumeroVencedor(){
   if(num){
     numeroVencedorAdmin = num.padStart(2,'0');
     salvarFirebase();
-    alert("Número vencedor definido!");
+    alert("Número definido!");
   }
 }
 
-// VOZ
 function falarPremio(nome, num){
   let msg = new SpeechSynthesisUtterance(
     `Parabéns ${nome || "ganhador"}! Número ${num}. Você ganhou ${valorPremio}`
@@ -155,7 +190,19 @@ function falarPremio(nome, num){
   speechSynthesis.speak(msg);
 }
 
-// CONFETE
+function iniciarTimer(callback){
+  clearInterval(intervalo);
+  tempo = 10;
+  intervalo = setInterval(()=>{
+    tempo--;
+    timerDiv.innerText = `00:${tempo.toString().padStart(2,'0')}`;
+    if(tempo <= 0){
+      clearInterval(intervalo);
+      callback();
+    }
+  },1000);
+}
+
 function confete(){
   for(let i=0;i<80;i++){
     let c = document.createElement("div");
@@ -168,22 +215,92 @@ function confete(){
   }
 }
 
-// TIMER
-function iniciarTimer(callback){
-  clearInterval(intervalo);
-  tempo = 10;
-
-  intervalo = setInterval(()=>{
-    tempo--;
-    timerDiv.innerText = `00:${tempo.toString().padStart(2,'0')}`;
-    if(tempo <= 0){
-      clearInterval(intervalo);
-      callback();
-    }
-  },1000);
+function compartilhar(){
+  let texto = `🏆 Número sorteado: ${resultado}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`);
 }
 
-// SORTEIO (COM TUDO FUNCIONANDO)
+function toggleLista(){
+  let box = document.getElementById("listaBox");
+  box.style.display = box.style.display === "none" ? "block" : "none";
+}
+
+function criar(){
+  grid.innerHTML="";
+  listaDiv.innerHTML="";
+  let disp=0,res=0,pag=0;
+
+  for(let i=0;i<250;i++){
+    let num = i.toString().padStart(2,'0');
+    let info = dados[num] || {status:"disponivel", nome:""};
+
+    if(info.status==="disponivel") disp++;
+    if(info.status==="reservado") res++;
+    if(info.status==="pago") pag++;
+
+    if(info.status === "pago"){
+      listaDiv.innerHTML += `${num} - ${info.nome}<br>`;
+    }
+
+    let div = document.createElement("div");
+    div.className = "bilhete " + info.status;
+    div.innerHTML = num + "<br><small>"+(info.nome||"")+"</small>";
+    div.onclick = () => clicar(num);
+
+    grid.appendChild(div);
+  }
+
+  document.getElementById("disp").innerText = disp;
+  document.getElementById("res").innerText = res;
+  document.getElementById("pag").innerText = pag;
+}
+
+function clicar(num){
+  let info = dados[num];
+
+  if(!adminAtivo && info && info.status !== "disponivel"){
+    alert("Número indisponível");
+    return;
+  }
+
+  if(!adminAtivo){
+    window.open(`https://wa.me/${numeroWhatsApp}?text=Quero o bilhete ${num}`);
+    if(!dados[num]) dados[num]={status:"reservado", nome:""};
+  } else {
+    let nome = prompt("Nome:");
+    if(!dados[num]) dados[num]={status:"disponivel", nome:""};
+
+    if(dados[num].status==="disponivel") dados[num].status="reservado";
+    else if(dados[num].status==="reservado") dados[num].status="pago";
+    else dados[num]={status:"disponivel", nome:""};
+
+    if(nome) dados[num].nome=nome;
+  }
+
+  salvarFirebase();
+}
+
+function admin(){
+  let s = prompt("Senha:");
+  if(s==="1234@#$%"){
+    adminAtivo=true;
+    document.getElementById("painel").style.display="block";
+    document.getElementById("valorInput").value = valorPremio;
+  }
+}
+
+function resetar(){
+  if(confirm("Apagar tudo?")){
+    dados = {};
+    resultado = "--";
+    db.collection("rifa").doc("dados").set({
+      bilhetes: {},
+      resultado: "--",
+      valor: valorPremio
+    });
+  }
+}
+
 function sortear(){
   if(!adminAtivo){ alert("Apenas admin"); return; }
 
@@ -193,42 +310,53 @@ function sortear(){
 
     if(pagos.length===0){ alert("Nenhum pago"); return; }
 
-    let vencedor;
+    let i=0;
 
-    if(numeroVencedorAdmin && pagos.includes(numeroVencedorAdmin)){
-      vencedor = numeroVencedorAdmin;
-    } else {
-      vencedor = pagos[Math.floor(Math.random()*pagos.length)];
-    }
+    let anim=setInterval(()=>{
+      let fake=Math.floor(Math.random()*100).toString().padStart(2,'0');
+      rDiv.innerText=fake;
+      i++;
 
-    let nome=dados[vencedor]?.nome || "Ganhador";
+      if(i>25){
+        clearInterval(anim);
 
-    resultado=vencedor;
-    rDiv.innerText="🏆 "+vencedor;
+        let vencedor;
 
-    numeroVencedorAdmin = null;
+        if(numeroVencedorAdmin && pagos.includes(numeroVencedorAdmin)){
+          vencedor = numeroVencedorAdmin;
+        } else {
+          vencedor = pagos[Math.floor(Math.random()*pagos.length)];
+        }
 
-    salvarFirebase();
+        let nome=dados[vencedor]?.nome || "Ganhador";
 
-    let moeda = document.getElementById("somMoeda");
-    let aplauso = document.getElementById("somMoeda2");
+        resultado=vencedor;
+        rDiv.innerText="🏆 "+vencedor;
 
-    moeda.currentTime = 0;
-    aplauso.currentTime = 0;
-    aplauso.volume = 0.3;
+        numeroVencedorAdmin = null;
 
-    moeda.play().catch(()=>{});
-    setTimeout(()=>aplauso.play().catch(()=>{}),1000);
+        salvarFirebase();
 
-    confete();
+        let moeda = document.getElementById("somMoeda");
+        let aplauso = document.getElementById("somMoeda2");
 
-    setTimeout(()=>{
-      falarPremio(nome, vencedor);
-    },1500);
+        moeda.currentTime = 0;
+        aplauso.currentTime = 0;
+        aplauso.volume = 0.3;
+
+        moeda.play();
+        setTimeout(()=>aplauso.play(),1000);
+
+        confete();
+
+        setTimeout(()=>{
+          falarPremio(nome, vencedor);
+        },1500);
+      }
+
+    },100);
   });
 }
-
-// resto do seu código permanece igual...
 </script>
 
 </body>
