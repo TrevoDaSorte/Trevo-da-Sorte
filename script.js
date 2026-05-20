@@ -595,6 +595,9 @@ voz.rate = 1;
 
 voz.pitch = 1.2;
 
+/* VOLUME MÁXIMO */
+voz.volume = 1;
+
 const vozes = speechSynthesis.getVoices();
 
 const feminina = vozes.find(v =>
@@ -609,6 +612,9 @@ v.name.toLowerCase().includes("google português")
 if(feminina){
 voz.voice = feminina;
 }
+
+/* cancela falas antigas */
+speechSynthesis.cancel();
 
 speechSynthesis.speak(voz);
 }
