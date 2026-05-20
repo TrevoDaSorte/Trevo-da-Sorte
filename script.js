@@ -620,7 +620,7 @@ function aplausos(){
 const audio =
 new Audio("aplausos.mp3");
 
-audio.volume = 1;
+audio.volume = 0.3;
 
 audio.play();
 
@@ -636,7 +636,7 @@ function moeda(){
 const audio =
 new Audio("PicPay.mp3");
 
-audio.volume = 1;
+audio.volume = 0.4;
 
 audio.play();
 
@@ -704,7 +704,7 @@ aplausos();
 moeda();
 
 falar(
-`Parabéns ${b.comprador}, você ganhou no Trevo da Sorte VIP`
+`Parabéns ${b.comprador}, você ganhou no Trevo da Sorte VIP!`
 );
 
 ganhou=true;
