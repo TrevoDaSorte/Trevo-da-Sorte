@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>🍀 Trevo da Sorte 🔑PIX</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#0f172a,#111827,#1e293b);
+    overflow:hidden;
+}
+
+.container{
+    text-align:center;
+    color:white;
+}
+
+h1{
+    font-size:38px;
+    margin-bottom:40px;
+    text-shadow:0 0 15px #00ff88;
+}
+
+/* BOTÃO */
+.pix-btn{
+    position:relative;
+    padding:20px 50px;
+    font-size:22px;
+    font-weight:bold;
+    color:white;
+    background:#111;
+    border:none;
+    border-radius:18px;
+    cursor:pointer;
+    overflow:hidden;
+    transition:0.3s;
+    box-shadow:0 0 20px rgba(0,255,136,0.5);
+}
+
+/* brilho animado */
+.pix-btn::before{
+    content:"";
+    position:absolute;
+    top:-2px;
+    left:-2px;
+    width:calc(100% + 4px);
+    height:calc(100% + 4px);
+    background:linear-gradient(
+        45deg,
+        #00ff88,
+        #00e5ff,
+        #00ff88,
+        #00e5ff
+    );
+    background-size:400%;
+    z-index:-1;
+    border-radius:20px;
+    animation:brilho 5s linear infinite;
+}
+
+@keyframes brilho{
+    0%{
+        background-position:0 0;
+    }
+    50%{
+        background-position:300% 0;
+    }
+    100%{
+        background-position:0 0;
+    }
+}
+
+.pix-btn:hover{
+    transform:scale(1.08);
+    box-shadow:0 0 35px #00ff88;
+}
+
+.info{
+    margin-top:20px;
+    font-size:16px;
+    color:#cbd5e1;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>🍀 Trevo da Sorte 🔑PIX</h1>
+
+    <button class="pix-btn" onclick="copiarPix()">
+        COPIAR CHAVE PIX
+    </button>
+
+    <p class="info">
+        Clique no botão para copiar a chave PIX 🔑
+    </p>
+
+</div>
+
+<script>
+
+function copiarPix(){
+
+    // SUA CHAVE PIX
+    const chavePix = "7c81606a-e7cc-4bce-b0c3-6c03f3363eee7c81606a-e7cc-4bce-b0c3-6c03f3363eee";
+
+    navigator.clipboard.writeText(chavePix);
+
+    alert("✅ Chave PIX copiada com sucesso!");
+
+    // REDIRECIONAR PARA A PÁGINA BANK
+    window.location.href = "https://bank.com";
+
+}
+
+</script>
+
+</body>
+</html>
