@@ -716,7 +716,7 @@ aplausos();
 moeda();
 
 falar(
-`Parabéns ${b.comprador}, você ganhou no Trevo da Sorte VIP!`
+`Parabéns ${b.comprador}, você ganhou na QUARTA DA SORTE !`
 );
 
  document
@@ -724,7 +724,7 @@ falar(
 "vencedor"
 )
 .innerHTML=
-"🎰 TEMOS UM GANHADOR VIP";
+"🎰 TEMOS UM GANHADOR";
 
  ganhou=true;
 
