@@ -42,7 +42,7 @@ function criarBilhetes(){
 let dados={};
  
 /* ======= bilhetes=========== */
-for(let i=1;i<=300;i++){
+for(let i=1;i<=200;i++){
 
 
 let numeros=[];
