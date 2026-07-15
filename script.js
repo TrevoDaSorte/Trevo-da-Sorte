@@ -40,8 +40,10 @@ let numerosManuais = [];
 function criarBilhetes(){
 
 let dados={};
-
+ 
+/* ======= bilhetes=========== */
 for(let i=1;i<=300;i++){
+
 
 let numeros=[];
 
