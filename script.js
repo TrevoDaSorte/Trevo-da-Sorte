@@ -41,7 +41,7 @@ function criarBilhetes(){
 
 let dados={};
 
-for(let i=1;i<=50;i++){
+for(let i=1;i<=300;i++){
 
 let numeros=[];
 
