@@ -35,14 +35,12 @@ let banco={};
 
 let numerosManuais = [];
 
-/* ==================== */
+* ======= bilhetes=========== */
+const TOTAL_BILHETES = 900;
 
 function criarBilhetes(){
 
 let dados={};
- 
-/* ======= bilhetes=========== */
-const TOTAL_BILHETES = 900;
 
 for(let i=1;i<=TOTAL_BILHETES;i++){
 
@@ -108,6 +106,10 @@ localStorage.getItem(
 mostrarData();
 
 for(let id in banco){
+
+    if(Number(id) > TOTAL_BILHETES){
+        continue;
+    }
 
 const b=banco[id];
 
@@ -991,9 +993,6 @@ alert(
 
 }
 
-
-
-const TOTAL_BILHETES = 250;
 
 db.collection("trevo")
 .doc("bilhetes")
