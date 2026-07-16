@@ -42,7 +42,9 @@ function criarBilhetes(){
 let dados={};
  
 /* ======= bilhetes=========== */
-for(let i=1;i<=250;i++){
+const TOTAL_BILHETES = 1000;
+
+for(let i=1;i<=TOTAL_BILHETES;i++){
 
 
 let numeros=[];
@@ -991,28 +993,74 @@ alert(
 
 
 
-db.collection("trevo")
-.doc("bilhetes")
-.onSnapshot((doc)=>{
-
-if(doc.exists){
-
-banco = doc.data();
-
-}else{
-
-banco = criarBilhetes();
+const TOTAL_BILHETES = 1000;
 
 db.collection("trevo")
 .doc("bilhetes")
-.set(banco);
+.onSnapshot(async (doc)=>{
 
-}
+    if(doc.exists){
 
-carregarSistema();
+        banco = doc.data();
+
+        let alterou = false;
+
+        for(let i=1;i<=TOTAL_BILHETES;i++){
+
+            if(!banco[i]){
+
+                let numeros=[];
+
+                for(let linha=0;linha<4;linha++){
+
+                    let usados=[];
+
+                    while(usados.length<4){
+
+                        let n=Math.floor(Math.random()*10);
+
+                        if(!usados.includes(n)){
+
+                            usados.push(n);
+                            numeros.push(n);
+
+                        }
+
+                    }
+
+                }
+
+                banco[i]={
+
+                    numeros:numeros,
+                    status:"livre",
+                    comprador:""
+
+                };
+
+                alterou=true;
+
+            }
+
+        }
+
+        if(alterou){
+
+            await salvar();
+
+        }
+
+    }else{
+
+        banco=criarBilhetes();
+
+        await salvar();
+
+    }
+
+    carregarSistema();
 
 });
-
 mostrarData();
 
 /* ==========limpar dados========== */
