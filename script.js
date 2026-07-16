@@ -42,7 +42,7 @@ function criarBilhetes(){
 let dados={};
  
 /* ======= bilhetes=========== */
-const TOTAL_BILHETES = 1000;
+const TOTAL_BILHETES = 900;
 
 for(let i=1;i<=TOTAL_BILHETES;i++){
 
