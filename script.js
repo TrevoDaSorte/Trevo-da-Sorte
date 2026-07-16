@@ -1,7 +1,7 @@
+==================== /
+/ FIREBASE /
+/ ==================== */
 
-/* ==================== */
-/* FIREBASE */
-/* ==================== */
 
 const firebaseConfig = {
 
@@ -23,8 +23,7 @@ firebaseConfig
 const db =
 firebase.firestore();
 
-/*==≈====≈=====firebase=====*/
-
+/==≈====≈=====firebase=====/
 
 let admin=false;
 
@@ -40,12 +39,11 @@ let numerosManuais = [];
 function criarBilhetes(){
 
 let dados={};
- 
+
 /* ======= bilhetes=========== */
 const TOTAL_BILHETES = 900;
 
 for(let i=1;i<=TOTAL_BILHETES;i++){
-
 
 let numeros=[];
 
@@ -121,21 +119,17 @@ let linhas="";
 for(let x=0;x<4;x++){
 
 linhas += `
-<div class="linha-bolas">
 
-${b.numeros
+<div class="linha-bolas">  ${b.numeros
 .slice(x*4,(x+1)*4)
 .map(n=>`
-<div class="numero-bola">
-${n}
-</div>
-`).join("")}
 
-</div>
-`;
-}
-
-let status=
+<div class="numero-bola">  
+${n}  
+</div>  
+`).join("")}  </div>  
+`;  
+}  let status=
 "🟢 DISPONÍVEL";
 
 if(b.status==="reservado"){
@@ -152,28 +146,25 @@ if(admin){
 
 botoes=`
 
-<div class="dataBilhete">
-📅 ${data}
-</div>
-
-<button
-class="btn-share"
+<div class="dataBilhete">  
+📅 ${data}  
+</div>  <button  
+class="btn-share"  
 onclick="compartilharBilhete(${id})">
 📤 Compartilhar
 </button>
 
-<button
-class="btn-confirmar"
+<button  
+class="btn-confirmar"  
 onclick="confirmarVenda(${id})">
 ✅ Vendido
 </button>
 
-<button
-class="btn-liberar"
+<button  
+class="btn-liberar"  
 onclick="liberarBilhete(${id})">
 🔵 Liberado
 </button>
-
 
 `;
 
@@ -181,8 +172,8 @@ onclick="liberarBilhete(${id})">
 
 botoes=`
 
-<button
-class="btn-reservar"
+<button  
+class="btn-reservar"  
 onclick="reservar(${id})">
 🎰 Reservar
 </button>
@@ -192,26 +183,18 @@ onclick="reservar(${id})">
 
 div.innerHTML=`
 
-<h3>
-🎰 Bilhete ${id}
-</h3>
+<h3>  
+🎰 Bilhete ${id}  
+</h3>  <p class="status">  
+${status}  
+</p>  <p class="nome">  
+${b.comprador || "Disponível"}  
+</p>  ${linhas}
 
-<p class="status">
-${status}
-</p>
-
-<p class="nome">
-${b.comprador || "Disponível"}
-</p>
-
-${linhas}
-
-<div class="ticket-actions">
-${botoes}
-</div>
-`;
-
-if(b.status==="reservado"){
+<div class="ticket-actions">  
+${botoes}  
+</div>  
+`;  if(b.status==="reservado"){
 div.style.border=
 "2px solid gold";
 }
@@ -268,8 +251,6 @@ document
 "menuAdmin"
 )
 .style.display="flex";
-
-
 
 carregarSistema();
 
@@ -368,7 +349,7 @@ canvas.toBlob(async(blob)=>{
 const file=
 new File(
 [blob],
-`bilhete-${id}.png`,
+bilhete-${id}.png,
 {type:'image/png'}
 );
 
@@ -394,7 +375,7 @@ link.href=
 URL.createObjectURL(blob);
 
 link.download=
-`bilhete-${id}.png`;
+bilhete-${id}.png;
 
 link.click();
 }
@@ -408,7 +389,6 @@ alert('Erro ao compartilhar');
 
 /* ==================== */
 
-
 function configurarSorteioManual(){
 
 let entrada = prompt(
@@ -419,7 +399,6 @@ Exemplo:
 ou -- Cancelar
 
 CONFIRMAR EM OK`
-
 
 );
 
@@ -475,8 +454,6 @@ numeros.join(" - ")
 );
 
 }
-
-
 
 async function sortearN1(){
 
@@ -563,18 +540,16 @@ numeros.includes(final)
 
 }
 
-
 numeros.push(final);
 
 numero.innerText=final;
 
 bolas.innerHTML += `
-<div class="bola">
-${final}
-</div>
-`;
 
-resolve();
+<div class="bola">  
+${final}  
+</div>  
+`;  resolve();
 }
 
 },100);
@@ -585,7 +560,6 @@ verificar(numeros);
 
 botao.disabled=false;
 }
-
 
 /* ==================== */
 
@@ -636,10 +610,7 @@ audio.play();
 
 }
 
-
-/*========moeda========*/
-
-
+/========moeda========/
 
 function moeda(){
 
@@ -670,7 +641,7 @@ confete.style.animationDuration =
 (Math.random()*3+2)+"s";
 
 confete.style.background =
-`hsl(${Math.random()*360},100%,50%)`;
+hsl(${Math.random()*360},100%,50%);
 
 document.body.appendChild(confete);
 
@@ -720,31 +691,31 @@ aplausos();
 moeda();
 
 falar(
-`Parabéns ${b.comprador}, você ganhou na QUARTA DA SORTE !`
+Parabéns ${b.comprador}, você ganhou na QUARTA DA SORTE !
 );
 
- document
+document
 .getElementById(
 "vencedor"
 )
 .innerHTML=
 "🎰 TEMOS UM GANHADOR";
 
- ganhou=true;
+ganhou=true;
 
 }else{
 
 /* se estiver disponível ou reservado */
- document
+document
 .getElementById(
 "vencedor"
 )
 .innerHTML=
 "🏆 PRÊMIO ACUMULADO";
 
- falar(
-`O prêmio foi para o bilhete ${id}, e foi acumulado para o próximo sorteio!`
- );
+falar(
+O prêmio foi para o bilhete ${id}, e foi acumulado para o próximo sorteio!
+);
 
 }
 
@@ -758,16 +729,16 @@ if(bilheteSorteado) break;
 /* caso nenhum bilhete tenha os números */
 if(!bilheteSorteado){
 
- document
+document
 .getElementById(
 "vencedor"
 )
 .innerHTML=
 "🏆 PRÊMIO ACUMULADO";
 
- falar(
+falar(
 "O prêmio foi acumulado. Boa sorte no próximo sorteio"
- );
+);
 
 }
 }
@@ -785,21 +756,17 @@ area.innerHTML="";
 for(let x=0;x<4;x++){
 
 area.innerHTML += `
-<div class="linha-bolas">
 
-${b.numeros
+<div class="linha-bolas">  ${b.numeros
 .slice(x*4,(x+1)*4)
 .map(n=>`
-<div class="numero-bola">
-${n}
-</div>
-`).join("")}
 
-</div>
-`;
-}
-
-let textoStatus = "🟢 DISPONÍVEL";
+<div class="numero-bola">  
+${n}  
+</div>  
+`).join("")}  </div>  
+`;  
+}  let textoStatus = "🟢 DISPONÍVEL";
 
 if(b.status === "reservado"){
 textoStatus = "🟡 RESERVADO";
@@ -809,16 +776,11 @@ if(b.status === "vendido"){
 textoStatus = "🏆 VENDIDO";
 }
 
- document
+document
 .getElementById(
 "nomeGanhador"
 )
-.innerHTML=`
-🎟️ Bilhete ${id}
-<br>
-${textoStatus}
-${b.comprador ? `<br>👤 ${b.comprador}` : ""}
-`;
+.innerHTML=  🎟️ Bilhete ${id}   <br>   ${textoStatus}   ${b.comprador ?<br>👤 ${b.comprador}: ""}  ;
 }
 /* ==================== */
 
@@ -991,70 +953,68 @@ alert(
 
 }
 
-
-
-/*const TOTAL_BILHETES = 250;*/
+const TOTAL_BILHETES = 250;
 
 db.collection("trevo")
 .doc("bilhetes")
 .onSnapshot(async (doc)=>{
 
-    if(doc.exists){
+if(doc.exists){  
 
-        banco = doc.data();
+    banco = doc.data();  
 
-        let alterou = false;
+    let alterou = false;  
 
-        for(let i = 1; i <= TOTAL_BILHETES; i++){
+    for(let i = 1; i <= TOTAL_BILHETES; i++){  
 
-            if(!banco[i]){
+        if(!banco[i]){  
 
-                let numeros = [];
+            let numeros = [];  
 
-                for(let linha = 0; linha < 4; linha++){
+            for(let linha = 0; linha < 4; linha++){  
 
-                    let usados = [];
+                let usados = [];  
 
-                    while(usados.length < 4){
+                while(usados.length < 4){  
 
-                        let n = Math.floor(Math.random()*10);
+                    let n = Math.floor(Math.random()*10);  
 
-                        if(!usados.includes(n)){
-                            usados.push(n);
-                            numeros.push(n);
-                        }
+                    if(!usados.includes(n)){  
+                        usados.push(n);  
+                        numeros.push(n);  
+                    }  
 
-                    }
+                }  
 
-                }
+            }  
 
-                banco[i] = {
-                    numeros: numeros,
-                    status: "livre",
-                    comprador: ""
-                };
+            banco[i] = {  
+                numeros: numeros,  
+                status: "livre",  
+                comprador: ""  
+            };  
 
-                alterou = true;
+            alterou = true;  
 
-            }
+        }  
 
-        }
+    }  
 
-        if(alterou){
-            await salvar();
-        }
+    if(alterou){  
+        await salvar();  
+    }  
 
-    }else{
+}else{  
 
-        banco = criarBilhetes();
-        await salvar();
+    banco = criarBilhetes();  
+    await salvar();  
 
-    }
+}  
 
-    carregarSistema();
+carregarSistema();
 
 });
 
 /* ==========limpar dados========== */
 
-/*localStorage.removeItem("bilhetes");*/
+/localStorage.removeItem("bilhetes");/
