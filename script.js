@@ -36,12 +36,13 @@ let banco={};
 let numerosManuais = [];
 
 /* ==================== */
+const TOTAL_BILHETES = 200;
 
 function criarBilhetes(){
 
 let dados={};
 
-for(let i=1;i<=50;i++){
+for(let i=1;i<=TOTAL_BILHETES;i++){
 
 let numeros=[];
 
@@ -716,7 +717,7 @@ aplausos();
 moeda();
 
 falar(
-`Parabéns ${b.comprador}, você ganhou no Trevo da Sorte VIP!`
+`Parabéns ${b.comprador}, você ganhou o Sorteio no QUARTA DA SORTE!`
 );
 
  document
@@ -739,7 +740,7 @@ falar(
 "🏆 PRÊMIO ACUMULADO";
 
  falar(
-`O prêmio foi para o bilhete ${id}, e foi acumulado para o próximo sorteio!`
+`O prêmio foi para o bilhete ${id}, e foi acumulado para o próximo sorteio, Boa Sorte!`
  );
 
 }
@@ -762,7 +763,7 @@ if(!bilheteSorteado){
 "🏆 PRÊMIO ACUMULADO";
 
  falar(
-"O prêmio foi acumulado. Boa sorte no próximo sorteio"
+"O prêmio foi acumulado. Boa sorte no próximo sorteio, Boa sorte!"
  );
 
 }
@@ -991,26 +992,64 @@ alert(
 
 db.collection("trevo")
 .doc("bilhetes")
-.onSnapshot((doc)=>{
+.onSnapshot(async (doc)=>{
 
-if(doc.exists){
+    if(doc.exists){
 
-banco = doc.data();
+        banco = doc.data();
 
-}else{
+        let alterou = false;
 
-banco = criarBilhetes();
+        for(let i = 1; i <= TOTAL_BILHETES; i++){
 
-db.collection("trevo")
-.doc("bilhetes")
-.set(banco);
+            if(!banco[i]){
 
-}
+                let numeros = [];
 
-carregarSistema();
+                for(let linha = 0; linha < 4; linha++){
+
+                    let usados = [];
+
+                    while(usados.length < 4){
+
+                        let n = Math.floor(Math.random()*10);
+
+                        if(!usados.includes(n)){
+                            usados.push(n);
+                            numeros.push(n);
+                        }
+
+                    }
+
+                }
+
+                banco[i] = {
+                    numeros: numeros,
+                    status: "livre",
+                    comprador: ""
+                };
+
+                alterou = true;
+
+            }
+
+        }
+
+        if(alterou){
+            await salvar();
+        }
+
+    }else{
+
+        banco = criarBilhetes();
+
+        await salvar();
+
+    }
+
+    carregarSistema();
 
 });
-
 mostrarData();
 
 /* ==========limpar dados========== */
