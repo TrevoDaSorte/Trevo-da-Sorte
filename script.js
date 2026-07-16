@@ -993,7 +993,7 @@ alert(
 
 
 
-const TOTAL_BILHETES = 1000;
+const TOTAL_BILHETES = 250;
 
 db.collection("trevo")
 .doc("bilhetes")
@@ -1005,55 +1005,48 @@ db.collection("trevo")
 
         let alterou = false;
 
-        for(let i=1;i<=TOTAL_BILHETES;i++){
+        for(let i = 1; i <= TOTAL_BILHETES; i++){
 
             if(!banco[i]){
 
-                let numeros=[];
+                let numeros = [];
 
-                for(let linha=0;linha<4;linha++){
+                for(let linha = 0; linha < 4; linha++){
 
-                    let usados=[];
+                    let usados = [];
 
-                    while(usados.length<4){
+                    while(usados.length < 4){
 
-                        let n=Math.floor(Math.random()*10);
+                        let n = Math.floor(Math.random()*10);
 
                         if(!usados.includes(n)){
-
                             usados.push(n);
                             numeros.push(n);
-
                         }
 
                     }
 
                 }
 
-                banco[i]={
-
-                    numeros:numeros,
-                    status:"livre",
-                    comprador:""
-
+                banco[i] = {
+                    numeros: numeros,
+                    status: "livre",
+                    comprador: ""
                 };
 
-                alterou=true;
+                alterou = true;
 
             }
 
         }
 
         if(alterou){
-
             await salvar();
-
         }
 
     }else{
 
-        banco=criarBilhetes();
-
+        banco = criarBilhetes();
         await salvar();
 
     }
@@ -1061,7 +1054,6 @@ db.collection("trevo")
     carregarSistema();
 
 });
-mostrarData();
 
 /* ==========limpar dados========== */
 
