@@ -40,10 +40,8 @@ let numerosManuais = [];
 function criarBilhetes(){
 
 let dados={};
- 
-/* ======= bilhetes=========== */
-for(let i=1;i<=200;i++){
 
+for(let i=1;i<=50;i++){
 
 let numeros=[];
 
@@ -718,7 +716,7 @@ aplausos();
 moeda();
 
 falar(
-`Parabéns ${b.comprador}, você ganhou na QUARTA DA SORTE !`
+`Parabéns ${b.comprador}, você ganhou no Trevo da Sorte VIP!`
 );
 
  document
@@ -726,7 +724,7 @@ falar(
 "vencedor"
 )
 .innerHTML=
-"🎰 TEMOS UM GANHADOR";
+"🎰 TEMOS UM GANHADOR VIP";
 
  ganhou=true;
 
@@ -1017,4 +1015,4 @@ mostrarData();
 
 /* ==========limpar dados========== */
 
-/*localStorage.removeItem("bilhetes");
+/*localStorage.removeItem("bilhetes");*/
