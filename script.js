@@ -35,7 +35,7 @@ let banco={};
 
 let numerosManuais = [];
 
-* ======= bilhetes=========== */
+/* ======= bilhetes=========== */
 const TOTAL_BILHETES = 900;
 
 function criarBilhetes(){
