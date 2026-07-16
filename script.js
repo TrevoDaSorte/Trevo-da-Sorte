@@ -993,7 +993,7 @@ alert(
 
 
 
-const TOTAL_BILHETES = 250;
+/*const TOTAL_BILHETES = 250;*/
 
 db.collection("trevo")
 .doc("bilhetes")
